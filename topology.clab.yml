@@ -23,9 +23,11 @@ topology:
       exec:
         - ip link set eth1 up
         - ip link set eth2 up
+        - ip link set eth3 up
         - ip link add br0 type bridge
         - ip link set eth1 master br0
         - ip link set eth2 master br0
+        - ip link set eth3 master br0
         - ip link set br0 up
 
     switch-b:
@@ -37,13 +39,15 @@ topology:
       exec:
         - ip link set eth1 up
         - ip link set eth2 up
+        - ip link set eth3 up
         - ip link add br0 type bridge
         - ip link set eth1 master br0
         - ip link set eth2 master br0
+        - ip link set eth3 master br0
         - ip link set br0 up
 
-    # --- Subnet A Host ---
-    host-a:
+    # --- Subnet A1 Host ---
+    host-a1:
       kind: linux
       image: alpine:latest
       labels:
@@ -54,8 +58,20 @@ topology:
         - ip addr add 192.168.10.2/24 dev eth1
         - ip route replace default via 192.168.10.1 dev eth1
 
-    # --- Subnet B Host ---
-    host-b:
+    # --- Subnet A2 Host ---
+    host-a2:
+      kind: linux
+      image: alpine:latest
+      labels:
+        graph-icon: host
+        graph-level: 3
+      exec:
+        - ip link set eth1 up
+        - ip addr add 192.168.10.3/24 dev eth1
+        - ip route replace default via 192.168.10.1 dev eth1
+
+    # --- Subnet B1 Host ---
+    host-b1:
       kind: linux
       image: alpine:latest
       labels:
@@ -66,11 +82,25 @@ topology:
         - ip addr add 192.168.20.2/24 dev eth1
         - ip route replace default via 192.168.20.1 dev eth1
 
+  # --- Subnet B2 Host ---
+    host-b2:
+      kind: linux
+      image: alpine:latest
+      labels:
+        graph-icon: host
+        graph-level: 3
+      exec:
+        - ip link set eth1 up
+        - ip addr add 192.168.20.3/24 dev eth1
+        - ip route replace default via 192.168.20.1 dev eth1# --- Subnet B Host ---
+
   links:
     # Subnet A (192.168.10.0/24)
-    - endpoints: ["host-a:eth1", "switch-a:eth1"]
-    - endpoints: ["router:eth1", "switch-a:eth2"]
+    - endpoints: ["host-a1:eth1", "switch-a:eth1"]
+    - endpoints: ["host-a2:eth1", "switch-a:eth2"]
+    - endpoints: ["router:eth1", "switch-a:eth3"]
 
     # Subnet B (192.168.20.0/24)
-    - endpoints: ["host-b:eth1", "switch-b:eth1"]
-    - endpoints: ["router:eth2", "switch-b:eth2"]
+    - endpoints: ["host-b1:eth1", "switch-b:eth1"]
+    - endpoints: ["host-b2:eth2", "switch-b:eth2"]
+    - endpoints: ["router:eth2", "switch-b:eth3"]
